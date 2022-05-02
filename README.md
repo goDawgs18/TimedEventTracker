@@ -7,10 +7,12 @@ Here is a table with all of the functions and descriptions for how to use the li
 | Function | Return Value| Description |
 |--|--|--|
 | TimedEventTracker() | TimedEventTracker | constructs a TimedEventTracker with all parameters initialized to zero |
-|setTimerDuration(uint32_t duration) | n/a | This will set the duration parameter for the timer object|
-|startTimer()| n/a | This will start the timer and will allow the TimedEventTracker to start counting events|
+|setTimerDuration(uint32_t duration) | bool | This will set the duration in seconds for the timer object if it not currently active. It will return true if it is able to set the time and false if it is not|
+|getTimerDuration() | uint32_t | This will return the current timer duration|
+|startTimer()| n/a | This will start the timer and will allow the TimedEventTracker to start counting events. This will also reset the counter to zero|
 |event() | bool counted | This will iterate the counter if a timer is active and it is within the time window. If it is counted then it will return True otherwise if it was not recorded will return false|
 |getCount()| unsigned  long count | This will return the current count for the TimedEventTracker. It will range from 0 to ULLONG_MAX |
+|getTimerActive()| bool | This will return if the timer is active or not |
 
 ## Example usage
 Here is a breif example of how the library could be implemented. 

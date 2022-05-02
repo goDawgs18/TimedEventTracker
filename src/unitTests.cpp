@@ -10,13 +10,13 @@ TEST(GoogleTest, basics) {
 	ASSERT_EQ(0, 0);
 }
 
-TEST(TimedEventTrackerTest, EasyCase) {
+TEST(TimedEventTracker, EasyCase) {
 	TimedEventTracker * testingObj = new TimedEventTracker();
 
 	int timerDuration = 1;
 	testingObj->setTimerDuration(timerDuration);
 
-	testingObj->event();
+	EXPECT_EQ(testingObj->event(), false);
 	EXPECT_EQ(testingObj->getCount(), 0);
 
 	testingObj->startTimer();
@@ -24,12 +24,12 @@ TEST(TimedEventTrackerTest, EasyCase) {
 	int numEvents = 10;
 
 	for (int i = 0; i < numEvents; i++) {
-		testingObj->event();
+		EXPECT_EQ(testingObj->event(), true);
 	}
 	// This will let tests run without the delay
 	testingObj->startTime -= std::chrono::seconds(timerDuration);
 
-	testingObj->event();
+	EXPECT_EQ(testingObj->event(), false);
 
 	EXPECT_EQ(testingObj->getCount(), numEvents);
 	
@@ -49,7 +49,7 @@ TEST(TimedEventTracker, ZeroTimer) {
 	int numEvents = 10;
 
 	for (int i = 0; i < numEvents; i++) {
-		testingObj->event();
+		EXPECT_EQ(testingObj->event(), false);
 	}
 	
 	EXPECT_EQ(testingObj->getCount(), 0);
@@ -68,7 +68,7 @@ TEST(TimedEventTracker, CountOverFlow) {
 	
 	EXPECT_EQ(testingObj->getCount(), ULLONG_MAX);
 
-	testingObj->event();
+	EXPECT_EQ(testingObj->event(), true);
 	EXPECT_EQ(testingObj->getCount(), ULLONG_MAX);
 	
 	delete testingObj;
@@ -84,20 +84,20 @@ TEST(TimedEventTracker, ReUseTimer) {
 	testingObj->startTimer();
 	
 	for (int i = 0; i < numEvents; i++) {
-		testingObj->event();
+		EXPECT_EQ(testingObj->event(), true);
 	}
 	EXPECT_EQ(testingObj->getCount(), numEvents);
 
 	testingObj->startTimer();
 	EXPECT_EQ(testingObj->getCount(), 0);
 	
-	testingObj->event();
+	EXPECT_EQ(testingObj->event(), true);
 
 	EXPECT_EQ(testingObj->getCount(), 1);
 	// This will let tests run without the delay
 	testingObj->startTime -= std::chrono::seconds(timerDuration);
 
-	testingObj->event();
+	EXPECT_EQ(testingObj->event(), false);
 	EXPECT_EQ(testingObj->getCount(), 1);
 	
 	delete testingObj;
@@ -114,7 +114,7 @@ TEST(TimedEventTracker, TimerRunOut) {
 	int numEvents = 10;
 
 	for (int i = 0; i < numEvents; i++) {
-		testingObj->event();
+		EXPECT_EQ(testingObj->event(), false);
 	}
 
 	EXPECT_EQ(testingObj->getCount(), 0);
@@ -132,13 +132,55 @@ TEST(TimedEventTracker, TimerMax) {
 	int numEvents = 10;
 
 	for (int i = 0; i < numEvents; i++) {
-		testingObj->event();
+		EXPECT_EQ(testingObj->event(), true);
 	}
 	testingObj->startTime -= std::chrono::seconds(timerDuration);
 
-	testingObj->event();
+	EXPECT_EQ(testingObj->event(), false);
 
 	EXPECT_EQ(testingObj->getCount(), numEvents);
 	
 	delete testingObj;
+}
+
+TEST(TimedEventTracker, ChangingDurationDuringTimer) {
+	TimedEventTracker * testingObj = new TimedEventTracker();
+
+	uint32_t timerDurationA = 1;
+	uint32_t timerDurationB = 2;
+	
+	EXPECT_EQ(testingObj->setTimerDuration(timerDurationA), true);
+	testingObj->startTimer();
+	EXPECT_EQ(testingObj->getTimerDuration(), timerDurationA);
+
+	EXPECT_EQ(testingObj->setTimerDuration(timerDurationB), false);
+	EXPECT_EQ(testingObj->getTimerDuration(), timerDurationA);
+
+	testingObj->startTime -= std::chrono::seconds(timerDurationA);
+
+	EXPECT_EQ(testingObj->setTimerDuration(timerDurationB), true);
+	EXPECT_EQ(testingObj->getTimerDuration(), timerDurationB);
+	
+	delete testingObj;
+}
+
+TEST(TimedEventTracker, GetTimerActive) {
+	TimedEventTracker * testingObj = new TimedEventTracker();
+
+	int timerDuration = 1;
+	testingObj->setTimerDuration(timerDuration);
+
+	EXPECT_EQ(testingObj->event(), false);
+
+	EXPECT_EQ(testingObj->getTimerActive(), false);
+	testingObj->startTimer();
+
+	EXPECT_EQ(testingObj->getTimerActive(), true);
+		
+	testingObj->startTime -= std::chrono::seconds(timerDuration);
+	EXPECT_EQ(testingObj->getTimerActive(), false);
+
+	delete testingObj;
+
+
 }
