@@ -1,5 +1,5 @@
-#ifndef PROJECT1_H_
-#define PROJECT1_H_
+#ifndef TIMED_EVENT_TRACKER_H_
+#define TIMED_EVENT_TRACKER_H_
 
 #include <chrono>
 #include <climits> 
@@ -97,4 +97,4 @@ private:
 		return duration_cast<duration<int> >(currTime - startTime).count();
 	} 
 };
-#endif /* PROJECT1_H_ */
+#endif /* TIMED_EVENT_TRACKER_H */
